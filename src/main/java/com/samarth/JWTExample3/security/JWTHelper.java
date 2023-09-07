@@ -16,7 +16,7 @@ public class JWTHelper {
 
 
     //requirement :
-    public static final long JWT_TOKEN_VALIDITY = 24 * 60 * 60;  // 24 hrs validity
+    public static final long JWT_TOKEN_VALIDITY = 60;  // 24 hrs validity
 
     //    public static final long JWT_TOKEN_VALIDITY =  60;
     private String secret = "afafasfafafasfasfasfafacasdasfasxASFACASDFACASDFASFASFDAFASFASDAADSCSDFADCVSGCFVADXCcadwavfsfarvf";

@@ -1,9 +1,8 @@
 package com.samarth.JWTExample3.Controllers;
 
+import com.samarth.JWTExample3.Service.RefreshTokenService;
 import com.samarth.JWTExample3.Service.UserService;
-import com.samarth.JWTExample3.modal.JWTRequest;
-import com.samarth.JWTExample3.modal.JWTResponse;
-import com.samarth.JWTExample3.modal.User;
+import com.samarth.JWTExample3.modal.*;
 import com.samarth.JWTExample3.security.JWTHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +35,9 @@ public class AuthContoller {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     private Logger logger = LoggerFactory.getLogger(AuthContoller.class);
 
     @PostMapping("/login")
@@ -45,8 +47,11 @@ public class AuthContoller {
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String token = this.jwtHelper.generateToken(userDetails);
 
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
+
         JWTResponse response = JWTResponse.builder()
                 .jwtToken(token)
+                .refreshToken(refreshToken.getRefreshToken())
                 .username(userDetails.getUsername()).build();
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -60,6 +65,19 @@ public class AuthContoller {
         catch (BadCredentialsException e){
             throw new RuntimeException("Invalid UserName and password !!");
         }
+    }
+    @PostMapping("/refresh")
+    public JWTResponse refreshJwtToken(@RequestBody RefreshTokenRequest request){
+
+        RefreshToken refreshToken = refreshTokenService.verifyRefreshToken(request.getRefreshToken());
+        User user = refreshToken.getUser();
+
+        String token = this.jwtHelper.generateToken(user);
+
+        return JWTResponse.builder().refreshToken(refreshToken.getRefreshToken())
+                .jwtToken(token)
+                .username(user.getEmail())
+                .build();
     }
 
 
